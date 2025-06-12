@@ -1,0 +1,97 @@
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
+
+function SetupInterview(props) 
+{
+    const toInterview=props.toInterview;
+
+    function handleRole(e)
+    {
+        const temp_value=e.target.value;
+        setRole(temp_value);
+    }
+
+    function handleCompanySize(e)
+    {
+        const temp_value=e.target.value;
+        setCompanySize(temp_value);
+    }
+    function handleScenario(e)
+    {
+        const temp_value=e.target.value;
+        setScenario(temp_value);
+    }
+    function handleLevel(e)
+    {
+        const temp_value=e.target.value;
+        setLevel(temp_value);
+    }
+    function submitQuery()
+    {
+        let query_temp="";
+        query_temp=`Give me a practice interivew for a ${level} level ${role} position.\n`;
+        query_temp+=`The company is a ${company_size} company and this is the ${scenario} interview. Ask me one question at a time.`;
+        setQuery(query_temp);
+        console.log(query_temp);
+        console.log(`${role} ${company_size} ${scenario}`);
+
+        toInterview(query_temp);
+    }
+    const [role, setRole] = useState("");
+
+
+    const [level,setLevel]=useState("Entry");
+
+    //Small, Medium, Large
+    const [company_size,setCompanySize]=useState("Small");
+
+    //Phone Screening, Behavioral Interview, Technical Questions, Final Round
+    const [scenario,setScenario]=useState("Phone Screening");
+
+    const names=["Zala","Jackie","Taavi","Ladislava","Osiris","Tracy","Jennings","Denton","Tatjana","Agathon","Jonathan"];
+
+    const [query,setQuery]=useState("");
+
+    return (
+    <>
+    <h2>Settings</h2>
+    <label htmlFor="role">Role:</label>
+    <select id="role" value={role} onChange={handleRole} className="block">
+    <option value="Front End">Front End</option>
+    <option value="Back End">Back End</option>
+    <option value="Full Stack">Full Stack</option>
+    </select>
+
+    <label htmlFor="level">Level:</label>
+    <select id="role" value={role} onChange={handleLevel} className="block">
+    <option value="Entry">Entry Level</option>
+    <option value="Mid">Mid Level</option>
+    <option value="Senior">Senior Level</option>
+    </select>
+
+    <label htmlFor="company_size">Company Size:</label>
+    <select id="company_size" value={company_size} onChange={handleCompanySize} className="block">
+    <option value="Small">Small</option>
+    <option value="Medium">Medium</option>
+    <option value="Large">Large</option>
+    </select>
+
+    <label htmlFor="scenario">Secnario:</label>
+    <select id="scenario" value={scenario} onChange={handleScenario} className="block">
+    <option value="Phone Screening">Phone Screening</option>
+    <option value="Behavioral Interview">Behavioral Interview</option>
+    <option value="Technical Questions">Technical Questions</option>
+    <option value="Final Round">Final Round</option>
+    </select>
+
+    <button onClick={submitQuery}>Submit</button>
+    <div>
+    {query}
+    </div>
+    </>
+  )
+}
+
+export default SetupInterview;
