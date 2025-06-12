@@ -30,6 +30,11 @@ function SetupInterview(props)
         const temp_value=e.target.value;
         setLevel(temp_value);
     }
+    function handleRequiredExperience(e)
+    {
+        const temp_value=e.target.value;
+        setRequiredExperience(temp_value);
+    }
     function submitQuery()
     {
         let query_temp="";
@@ -41,10 +46,8 @@ function SetupInterview(props)
 
         toInterview(query_temp);
     }
+
     const [role, setRole] = useState("");
-
-
-    const [level,setLevel]=useState("Entry");
 
     //Small, Medium, Large
     const [company_size,setCompanySize]=useState("Small");
@@ -56,18 +59,48 @@ function SetupInterview(props)
 
     const [query,setQuery]=useState("");
 
+    const [level,setLevel]=useState("Entry");
+    
+    const [required_experience,setRequiredExperience]=useState("*");
+
     const [role_options,setRoleOptions]=useState();
+
     useEffect(()=>
     {
-        read_text_file("./job_titles.txt").then((roles)=>{
-            const role_options_temp=roles.map(role=><option value={role} key={role}>{role}</option>);
+        read_excel_file("./Career_Info_V3.xlsx").then((roles)=>
+        {
+            if(required_experience!="*")
+            {
+                roles=roles.filter(role=>role["Typical Education Level"]==required_experience);
+            }
+
+            roles.sort((a,b) => a.Occupation.localeCompare(b.Occupation));
+            console.log(roles);
+            const role_options_temp=roles.map(role=><option value={role.Occupation} key={role.Occupation}>{role.Occupation}</option>);
             setRoleOptions(role_options_temp);
         });
-    },[]);
+    },[required_experience]);
 
     return (
     <>
     <h2>Settings</h2>
+    <label htmlFor="required_experience">Required Experience</label>
+    <select id="required_experience" value={required_experience} onChange={handleRequiredExperience} className="block">
+    <option value="*">Any</option>
+    <option value={1}>No formal educational credential</option>
+    <option value={2}>High school diploma or equivalent</option>
+    <option value={3}>Some college, no degree
+</option>
+    <option value={4}>Associate's degree
+</option>
+    <option value={5}>Bachelor's degree
+</option>
+    <option value={6}>Master's degree
+</option>
+    <option value={7}>Doctoral or professional degree
+</option>
+    </select>
+
     <label htmlFor="role">Role:</label>
     <input id="role" list="roles" value={role} onChange={handleRole} className="block"></input>
     
@@ -76,7 +109,7 @@ function SetupInterview(props)
     </datalist>
 
     <label htmlFor="level">Level:</label>
-    <select id="role" value={role} onChange={handleLevel} className="block">
+    <select id="level" value={role} onChange={handleLevel} className="block">
     <option value="Entry">Entry Level</option>
     <option value="Mid">Mid Level</option>
     <option value="Senior">Senior Level</option>

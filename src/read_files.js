@@ -17,9 +17,9 @@ async function to_dictionaries(rows)
 }
 export async function read_excel_file(file_name)
 {
-    return await fetch(`../public/${file_name}`)
+    return await fetch(file_name)
   .then(response => response.blob())
-  .then(blob => readXlsxFile(blob))
+  .then(blob => readXlsxFile(blob,{ sheet: 'Data' }))
   .then(async(rows) => {
     // `rows` is an array of rows
     // each row being an array of cells.\
