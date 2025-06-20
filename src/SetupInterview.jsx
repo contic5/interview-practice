@@ -7,6 +7,7 @@ import {read_text_file,read_excel_file} from './read_files.js'
 function SetupInterview(props) 
 {
     const toInterview=props.toInterview;
+    const question_type=props.question_type;
 
     function handleRole(e)
     {
@@ -37,7 +38,8 @@ function SetupInterview(props)
     function submitQuery()
     {
         let query_temp="";
-        if(props.question_type=="interview")
+        console.log(question_type);
+        if(question_type=="interview_question")
         {
             query_temp=`Give me a practice interivew for a ${level} level ${role} position.\n`;
             query_temp+=`The company is a ${company_size} company and this is the ${scenario} interview. Ask me one question at a time.`;
@@ -92,7 +94,7 @@ function SetupInterview(props)
     <>
     <h2>Settings</h2>
     <label htmlFor="question_type">Set Question Type</label>
-    <select id="question_type" value={props.question_type} onChange={props.handleQuestionType} className="block">
+    <select id="question_type" value={question_type} onChange={props.handleQuestionType} className="block">
     <option value="customer_service_scenario">Customer Service Scenario</option>
     <option value="interview_question">Interview Question</option>
     </select>

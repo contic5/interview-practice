@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useEffect,useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 const OPEN_AI_KEY=import.meta.env.VITE_OPEN_AI;
-const running_queries=false;
+const running_queries=true;
 
 function Interview(props)
 {
+  const question_type=props.question_type;
+  
   async function get_chatgpt_response(messages)
   {
     console.log(messages);
@@ -58,8 +60,19 @@ function Interview(props)
     {
       const system_response_message= {role:'system',content:system_response_content};
       const interview_message={role:'user',content:interview_message_content};
-      const user_answer_message = { role: 'user', content: `You asked me ${chat_gpt_question} My answer was ${user_answer}. Write the score on the last line as X/10. Do not ask another question.` };
+
+      let user_answer_message_content="";
+      let user_answer_message={};
+      if(question_type=="interview_question")
+      {
+        user_answer_message = { role: 'user', content: `You asked me ${chat_gpt_question} My answer was ${user_answer}. Write the score on the last line as X/10. Do not ask another question.` };
+      }
+      else
+      {
+        user_answer_message = { role: 'user', content: `You asked me ${chat_gpt_question} My answer was ${user_answer}. Write the score on the last line as X/10. Do not give me another scenario.` };
+      }
       let messages=[system_response_message,interview_message,user_answer_message];
+      console.log(messages);
       const new_response=await get_chatgpt_response(messages);
       setChatGPTResponse(new_response);
 
@@ -90,7 +103,7 @@ function Interview(props)
 
   let system_response_content="You are an interviewing tool. Make sure to give helpful questions.";
   let system_question_generation_content="You are an interviewing tool. Make sure to give helpful questions. I already answered one question.";
-  if(props.question_type=="customer_service_scenario")
+  if(question_type=="customer_service_scenario")
   {
     system_response_content="You are an interviewing tool. Make sure to give helpful customer service scenarios.";
     system_question_generation_content="You are an interviewing tool. Make sure to give helpful customer service scenarios.";
@@ -101,6 +114,18 @@ function Interview(props)
   const [user_answer,setUserAnswer]=useState("");
   const [chatgpt_response,setChatGPTResponse]=useState("After you give your answer, ChatGPT will respond.");
   const [chat_gpt_question,setChatGPTQuestion]=useState("Why are you interested in the position?");
+  useEffect(()=>
+  {
+      if(question_type=="interview_question")
+      {
+        setChatGPTQuestion("Why are you interested in the position");
+      }
+      else
+      {
+        setChatGPTQuestion("How would you first talk with a new customer or client?")
+      }
+  },[question_type]);
+
   const [scores,setScores]=useState([]);
 
   const score_elements=scores.map((score,index)=><p key={index}>{score}/10</p>);

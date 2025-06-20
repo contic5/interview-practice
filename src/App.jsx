@@ -17,9 +17,11 @@ function App()
   {
     setMode(new_mode);
   }
-  function handleQuestionType(new_question_type)
+  function handleQuestionType(e)
   {
+    const new_question_type=e.target.value;
     setQuestionType(new_question_type);
+    console.log(new_question_type);
   }
   const [mode,setMode]=useState("setup");
   const [question_type,setQuestionType]=useState("customer_service_scenario");
@@ -30,7 +32,7 @@ function App()
     return (
       <>
         <h1>Interview Practice</h1>
-        <SetupInterview toInterview={toInterview} switch_mode={switch_mode} handleQuestionType={setQuestionType}></SetupInterview>
+        <SetupInterview toInterview={toInterview} switch_mode={switch_mode} handleQuestionType={handleQuestionType} question_type={question_type}></SetupInterview>
       </>
     );
   }
