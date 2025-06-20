@@ -88,9 +88,13 @@ function Interview(props)
     setUserAnswer(new_user_answer);
   }
 
-  const system_response_content="You are an interviewing tool. Make sure to give helpful questions.";
-
-  const system_question_generation_content="You are an interviewing tool. Make sure to give helpful questions. I already answered one question.";
+  let system_response_content="You are an interviewing tool. Make sure to give helpful questions.";
+  let system_question_generation_content="You are an interviewing tool. Make sure to give helpful questions. I already answered one question.";
+  if(props.question_type=="customer_service_scenario")
+  {
+    system_response_content="You are an interviewing tool. Make sure to give helpful customer service scenarios.";
+    system_question_generation_content="You are an interviewing tool. Make sure to give helpful customer service scenarios.";
+  }
 
   const interview_message_content=props.query;
 
@@ -99,11 +103,12 @@ function Interview(props)
   const [chat_gpt_question,setChatGPTQuestion]=useState("Why are you interested in the position?");
   const [scores,setScores]=useState([]);
 
-  const score_elements=scores.map(score=><p>{score}/10</p>);
+  const score_elements=scores.map((score,index)=><p key={index}>{score}/10</p>);
 
   return(
   <>
   <h2>Interview</h2>
+  <button onClick={()=>props.switch_mode("setup")}>Change Interview Settings</button>
   <h3>ChatGPT Response</h3>
   <p>{chatgpt_response}</p>
   <h3>ChatGPT Question</h3>
@@ -112,6 +117,7 @@ function Interview(props)
   <textarea id="user_answer" onChange={handleInput} value={user_answer} rows="8" cols="50">
   </textarea><br></br>
   <button onClick={submitInput}>Submit</button>
+  <h3>Query</h3>
   <p>{system_question_generation_content}</p>
   <p>{interview_message_content}</p>
 

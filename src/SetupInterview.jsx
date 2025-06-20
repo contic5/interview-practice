@@ -3,7 +3,6 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import {read_text_file,read_excel_file} from './read_files.js'
-import fs from 'fs';
 
 function SetupInterview(props) 
 {
@@ -38,8 +37,16 @@ function SetupInterview(props)
     function submitQuery()
     {
         let query_temp="";
-        query_temp=`Give me a practice interivew for a ${level} level ${role} position.\n`;
-        query_temp+=`The company is a ${company_size} company and this is the ${scenario} interview. Ask me one question at a time.`;
+        if(props.question_type=="interview")
+        {
+            query_temp=`Give me a practice interivew for a ${level} level ${role} position.\n`;
+            query_temp+=`The company is a ${company_size} company and this is the ${scenario} interview. Ask me one question at a time.`;
+        }
+        else
+        {
+            query_temp=`Give me customer service scenarios for a ${level} level ${role} position.\n`;
+            query_temp+=`The company is a ${company_size} company. Give me one scenario at a time.`;
+        }
         setQuery(query_temp);
         console.log(query_temp);
         console.log(`${role} ${company_size} ${scenario}`);
@@ -84,6 +91,12 @@ function SetupInterview(props)
     return (
     <>
     <h2>Settings</h2>
+    <label htmlFor="question_type">Set Question Type</label>
+    <select id="question_type" value={props.question_type} onChange={props.handleQuestionType} className="block">
+    <option value="customer_service_scenario">Customer Service Scenario</option>
+    <option value="interview_question">Interview Question</option>
+    </select>
+
     <label htmlFor="required_experience">Required Experience</label>
     <select id="required_experience" value={required_experience} onChange={handleRequiredExperience} className="block">
     <option value="*">Any</option>

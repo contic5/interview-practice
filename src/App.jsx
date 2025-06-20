@@ -10,10 +10,19 @@ function App()
   function toInterview(new_query)
   {
     console.log(`New Query is ${new_query}`)
-    setMode("interview");
+    switch_mode("interview");
     setQuery(new_query);
   }
+  function switch_mode(new_mode)
+  {
+    setMode(new_mode);
+  }
+  function handleQuestionType(new_question_type)
+  {
+    setQuestionType(new_question_type);
+  }
   const [mode,setMode]=useState("setup");
+  const [question_type,setQuestionType]=useState("customer_service_scenario");
   const [query,setQuery]=useState("Give me a practice interivew for a Entry level Front End position. The company is a Small company and this is the Phone Screening interview. Ask me one question at a time.");
 
   if(mode=="setup")
@@ -21,7 +30,7 @@ function App()
     return (
       <>
         <h1>Interview Practice</h1>
-        <SetupInterview toInterview={toInterview}></SetupInterview>
+        <SetupInterview toInterview={toInterview} switch_mode={switch_mode} handleQuestionType={setQuestionType}></SetupInterview>
       </>
     );
   }
@@ -30,7 +39,7 @@ function App()
     return (
       <>
         <h1>Interview Practice</h1>
-        <Interview query={query}></Interview>
+        <Interview query={query} question_type={question_type} switch_mode={switch_mode}></Interview>
       </>
     );
   }
