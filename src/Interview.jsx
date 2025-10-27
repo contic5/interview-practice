@@ -1,9 +1,15 @@
 import { useEffect,useState } from 'react'
+import { GoogleGenAI } from "@google/genai";
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 const OPEN_AI_KEY=import.meta.env.VITE_OPEN_AI;
+const GOOGLE_GEMINI_KEY=import.meta.env.VITE_GOOGLE_GEMINI;
 const running_queries=true;
+
+console.log(GOOGLE_GEMINI_KEY);
+const ai = new GoogleGenAI({apiKey:GOOGLE_GEMINI_KEY});
+const ai_role_name="model";
 
 function Interview(props)
 {
@@ -35,6 +41,25 @@ function Interview(props)
     //setMessages([...updatedMessages, assistantReply]);
     return chatGPTMesage.content;
   }
+  async function get_gemini_response(messages)
+  {
+      let history=[];
+      for (let i=0;i<messages.length-1;i++)
+      {
+        history.push({role:messages[i].role,parts:[{text:messages[i].content}]});
+      }
+      const chat = ai.chats.create({
+      model: "gemini-2.5-flash",
+      history: history
+    });
+
+    const response = await chat.sendMessage(
+    {
+      message:messages[messages.length-1].content
+    });
+
+    return response.text;
+  }
   function find_score(new_response)
   {
     if(!running_queries)
@@ -49,6 +74,7 @@ function Interview(props)
       if(word.includes("/"))
       {
         const parts=word.split("/");
+        console.log(`Score: ${parts}`);
         return parseInt(parts[0]);
       }
     }
@@ -58,7 +84,7 @@ function Interview(props)
   {
     try 
     {
-      const system_response_message= {role:'system',content:system_response_content};
+      const system_response_message= {role:ai_role_name,content:system_response_content};
       const interview_message={role:'user',content:interview_message_content};
 
       let user_answer_message_content="";
@@ -73,16 +99,16 @@ function Interview(props)
       }
       let messages=[system_response_message,interview_message,user_answer_message];
       console.log(messages);
-      const new_response=await get_chatgpt_response(messages);
+      const new_response=await get_gemini_response(messages);
       setChatGPTResponse(new_response);
 
       const score=find_score(new_response);
       setScores(scores=>[...scores,score]);
 
-      const system_generation_message= {role:'system',content:system_question_generation_content};
+      const system_generation_message= {role:ai_role_name,content:system_question_generation_content};
       const new_question_message={role:'user',content:`${interview_message_content}`};
       messages=[system_generation_message,new_question_message];
-      const new_question=await get_chatgpt_response(messages);
+      const new_question=await get_gemini_response(messages);
       setChatGPTQuestion(new_question);
 
       if(!running_queries)
