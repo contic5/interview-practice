@@ -7,11 +7,11 @@ import Interview from './Interview'
 
 function App() 
 {
-  function toInterview(new_query)
+  function toInterview(new_ai_context_query)
   {
-    console.log(`New Query is ${new_query}`)
+    console.log(`New Query is ${new_ai_context_query}`)
     switch_mode("interview");
-    setQuery(new_query);
+    setAIContextQuery(new_ai_context_query);
   }
   function switch_mode(new_mode)
   {
@@ -25,7 +25,7 @@ function App()
   }
   const [mode,setMode]=useState("setup");
   const [question_type,setQuestionType]=useState("customer_service_scenario");
-  const [query,setQuery]=useState("Give me a practice interivew for a Entry level Front End position. The company is a Small company and this is the Phone Screening interview. Ask me one question at a time.");
+  const [ai_context_query,setAIContextQuery]=useState("Give me a practice interivew for a Entry level Front End position. The company is a Small company and this is the Phone Screening interview. Ask me one question at a time.");
 
   if(mode=="setup")
   {
@@ -41,7 +41,7 @@ function App()
     return (
       <>
         <h1>Interview Practice</h1>
-        <Interview query={query} question_type={question_type} switch_mode={switch_mode}></Interview>
+        <Interview ai_context_query={ai_context_query} question_type={question_type} switch_mode={switch_mode}></Interview>
       </>
     );
   }
