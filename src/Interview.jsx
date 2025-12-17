@@ -54,6 +54,33 @@ function Interview(props)
     }
     return -1;
   }
+  function gradual_display(response_index=0,question_index=0)
+  {
+      let done=false;
+
+      if(response_index<chatgpt_response.length)
+      {
+        response_index+=1;
+      }
+      else if(question_index<chatgpt_question.length)
+      {
+        question_index+=1;
+      }
+      else
+      {
+        done=true;
+      }
+
+      let chatgpt_response_written_temp=chatgpt_response.substring(0,response_index);
+      setChatGPTResponseWritten(chatgpt_response_written_temp);
+      let chatgpt_question_written_temp=chatgpt_question.substring(0,question_index);
+      setChatGPTQuestionWritten(chatgpt_question_written_temp);
+
+      if(!done)
+      {
+        setTimeout(()=>{gradual_display(response_index,question_index)},10);
+      }
+  }
   async function submitInput()
   {
     try 
@@ -65,11 +92,11 @@ function Interview(props)
       let user_answer_message={};
       if(question_type=="interview_question")
       {
-        user_answer_message = { role: 'user', content: `You asked me ${chat_gpt_question} My answer was ${user_answer}. Write the score on the last line as X/10. Do not ask another question.` };
+        user_answer_message = { role: 'user', content: `You asked me ${chatgpt_question} My answer was ${user_answer}. Write the score on the last line as X/10. Do not ask another question.` };
       }
       else
       {
-        user_answer_message = { role: 'user', content: `You asked me ${chat_gpt_question} My answer was ${user_answer}. Write the score on the last line as X/10. Do not give me another scenario.` };
+        user_answer_message = { role: 'user', content: `You asked me ${chatgpt_question} My answer was ${user_answer}. Write the score on the last line as X/10. Do not give me another scenario.` };
       }
       let messages=[system_response_message,interview_message,user_answer_message];
       console.log(messages);
@@ -113,7 +140,10 @@ function Interview(props)
 
   const [user_answer,setUserAnswer]=useState("");
   const [chatgpt_response,setChatGPTResponse]=useState("After you give your answer, ChatGPT will respond.");
-  const [chat_gpt_question,setChatGPTQuestion]=useState("Why are you interested in the position?");
+  const [chatgpt_response_written,setChatGPTResponseWritten]=useState(chatgpt_response);
+  const [chatgpt_question,setChatGPTQuestion]=useState("Why are you interested in the position?");
+  const [chatgpt_question_written,setChatGPTQuestionWritten]=useState(chatgpt_question);
+
   useEffect(()=>
   {
       if(question_type=="interview_question")
@@ -124,7 +154,12 @@ function Interview(props)
       {
         setChatGPTQuestion("How would you first talk with a new customer or client?")
       }
+      gradual_display();
   },[question_type]);
+
+  useEffect(()=>{
+    gradual_display();
+  },[chatgpt_response,chatgpt_question])
 
   const [scores,setScores]=useState([]);
 
@@ -135,21 +170,22 @@ function Interview(props)
   <h2>Interview</h2>
   <button onClick={()=>props.switch_mode("setup")}>Change Interview Settings</button>
   <h3>ChatGPT Response</h3>
-  <p>{chatgpt_response}</p>
+  <p>{chatgpt_response_written}</p>
   <h3>ChatGPT Question</h3>
-  <p>{chat_gpt_question}</p>
+  <p>{chatgpt_question_written}</p>
   <h3>Your Answer</h3>
   <textarea id="user_answer" onChange={handleInput} value={user_answer} rows="8" cols="50">
   </textarea><br></br>
   <button onClick={submitInput}>Submit</button>
-  <h3>Query</h3>
-  <p>{system_question_generation_content}</p>
-  <p>{interview_message_content}</p>
 
   <h3>Scores</h3>
   <div>
   {score_elements}
   </div>
+
+  <h3>Query</h3>
+  <p>{system_question_generation_content}</p>
+  <p>{interview_message_content}</p>
   </>
   );
 }
