@@ -1,0 +1,2 @@
+https://console.cloud.google.com/apis/credentials
+https://aistudio.google.com/api-keys

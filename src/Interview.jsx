@@ -7,7 +7,6 @@ const OPEN_AI_KEY=import.meta.env.VITE_OPEN_AI;
 const GOOGLE_GEMINI_KEY=import.meta.env.VITE_GOOGLE_GEMINI;
 const running_queries=true;
 
-console.log(GOOGLE_GEMINI_KEY);
 const ai = new GoogleGenAI({apiKey:GOOGLE_GEMINI_KEY});
 const ai_role_name="model";
 
@@ -15,7 +14,7 @@ function Interview(props)
 {
   const question_type=props.question_type;
   
-  async function get_chatgpt_response(messages)
+  async function get_ai_response(messages)
   {
     console.log(messages);
     if(!running_queries)
@@ -100,7 +99,7 @@ function Interview(props)
       let messages=[system_response_message,interview_message,user_answer_message];
       console.log(messages);
       const new_response=await get_gemini_response(messages);
-      setChatGPTResponse(new_response);
+      setAIResponse(new_response);
 
       const score=find_score(new_response);
       setScores(scores=>[...scores,score]);
@@ -109,7 +108,7 @@ function Interview(props)
       const new_question_message={role:'user',content:`${interview_message_content}`};
       messages=[system_generation_message,new_question_message];
       const new_question=await get_gemini_response(messages);
-      setChatGPTQuestion(new_question);
+      setAIQuestion(new_question);
 
       if(!running_queries)
       {
@@ -138,17 +137,17 @@ function Interview(props)
   const interview_message_content=props.query;
 
   const [user_answer,setUserAnswer]=useState("");
-  const [chatgpt_response,setChatGPTResponse]=useState("After you give your answer, ChatGPT will respond.");
-  const [chat_gpt_question,setChatGPTQuestion]=useState("Why are you interested in the position?");
+  const [ai_response,setAIResponse]=useState("After you give your answer, ChatGPT will respond.");
+  const [chat_gpt_question,setAIQuestion]=useState("Why are you interested in the position?");
   useEffect(()=>
   {
       if(question_type=="interview_question")
       {
-        setChatGPTQuestion("Why are you interested in the position");
+        setAIQuestion("Why are you interested in the position");
       }
       else
       {
-        setChatGPTQuestion("How would you first talk with a new customer or client?")
+        setAIQuestion("How would you first talk with a new customer or client?")
       }
   },[question_type]);
 
@@ -161,7 +160,7 @@ function Interview(props)
   <h2>Interview</h2>
   <button onClick={()=>props.switch_mode("setup")}>Change Interview Settings</button>
   <h3>ChatGPT Response</h3>
-  <p>{chatgpt_response}</p>
+  <p>{ai_response}</p>
   <h3>ChatGPT Question</h3>
   <p>{chat_gpt_question}</p>
   <h3>Your Answer</h3>
