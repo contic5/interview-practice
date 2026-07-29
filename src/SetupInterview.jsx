@@ -56,7 +56,7 @@ function SetupInterview(props)
         toInterview(query_temp);
     }
 
-    const [role, setRole] = useState("");
+    const [role, setRole] = useState("Front End Developer");
 
     //Small, Medium, Large
     const [company_size,setCompanySize]=useState("Small");
