@@ -244,6 +244,7 @@ function Interview(props)
   </div>
   <h3>ChatGPT Response</h3>
   <p>{ai_response}</p>
+  <p>{ai_response}</p>
   <h3>ChatGPT Question</h3>
   <p>{ai_question}</p>
   <h3>Your Answer</h3>

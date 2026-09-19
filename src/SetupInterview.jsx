@@ -38,7 +38,6 @@ function SetupInterview(props)
     function submitQuery()
     {
         let query_temp="";
-        console.log(question_type);
         if(question_type=="interview_question")
         {
             query_temp=`Give me a practice interivew for a ${level} level ${role} position.\n`;
@@ -84,7 +83,6 @@ function SetupInterview(props)
             }
 
             roles.sort((a,b) => a.Occupation.localeCompare(b.Occupation));
-            console.log(roles);
             const role_options_temp=roles.map(role=><option value={role.Occupation} key={role.Occupation}>{role.Occupation}</option>);
             setRoleOptions(role_options_temp);
         });
