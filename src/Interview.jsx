@@ -4,9 +4,11 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
+/// <reference types="node" />
+
 //Keys for Open_AI and Google Gemini
-const OPEN_AI_KEY=import.meta.env.VITE_OPEN_AI;
-const GOOGLE_GEMINI_KEY=import.meta.env.VITE_GOOGLE_GEMINI;
+const OPEN_AI_KEY=process.env.OPEN_AI;
+const GOOGLE_GEMINI_KEY=process.env.GOOGLE_GEMINI;
 
 //If false, the Interview System does not run queries.
 const running_queries=true;
@@ -243,7 +245,6 @@ function Interview(props)
   <input id="timer_speed" value={timer_speed} onChange={handleTimeSpeed} type="range" min={1} max={100}></input>
   </div>
   <h3>ChatGPT Response</h3>
-  <p>{ai_response}</p>
   <p>{ai_response}</p>
   <h3>ChatGPT Question</h3>
   <p>{ai_question}</p>
