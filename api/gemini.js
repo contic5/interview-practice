@@ -19,7 +19,7 @@ export default async function handler(req, res)
   {
     const googleAI = new GoogleGenAI({apiKey: globalThis.process.env.GOOGLE_GEMINI});
     const chat = googleAI.chats.create({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.6-flash',
       history: history
     });
     const result = await chat.sendMessage({message: message});
