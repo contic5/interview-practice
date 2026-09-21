@@ -175,8 +175,6 @@ function Interview(props)
   }
   async function submitInput()
   {
-    try 
-    {
       //Framing so the interviewer AI responds to the question and does NOT GIVE ANOTHER QUESTION
       const system_response_message= {role:ai_role_name,content:system_response_content};
 
@@ -210,11 +208,7 @@ function Interview(props)
         new_ai_response=await get_gemini_response(messages);
       }
       handle_response(new_ai_response);
-    } 
-    catch (error) 
-    {
-      console.error('Error:', error);
-    }
+    
   }
   function handleInput(e)
   {
