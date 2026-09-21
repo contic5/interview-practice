@@ -1,14 +1,7 @@
 import { useEffect,useState } from 'react'
-import { GoogleGenAI } from "@google/genai";
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-
-/// <reference types="node" />
-
-//Keys for Open_AI and Google Gemini
-const OPEN_AI_KEY=process.env.OPEN_AI;
-const GOOGLE_GEMINI_KEY=process.env.GOOGLE_GEMINI;
 
 //If false, the Interview System does not run queries.
 const running_queries=true;
@@ -20,11 +13,6 @@ if(main_ai=="gemini")
 {
   ai_role_name="model";
 }
-
-console.log(GOOGLE_GEMINI_KEY);
-const google_ai = new GoogleGenAI({apiKey:GOOGLE_GEMINI_KEY});
-
-
 
 function Interview(props)
 {
@@ -76,21 +64,19 @@ function Interview(props)
     }
 
     //Get query from ChatGPT
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const result = await fetch('/api/openai', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + OPEN_AI_KEY
       },
       body: JSON.stringify({
         model: "gpt-5-nano",
         messages: messages
       })
     });
-    console.log(response);
 
     //Choose the first response.
-    const data = await response.json();
+    const data = await result.json();
     const chatGPTMesage = data.choices[0].message;
     //setMessages([...updatedMessages, assistantReply]);
     return chatGPTMesage.content;
@@ -103,18 +89,24 @@ function Interview(props)
       {
         history.push({role:messages[i].role,parts:[{text:messages[i].content}]});
       }
-      const chat = google_ai.chats.create({
-      model: "gemini-2.5-flash",
-      history: history
+      const result = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          history: history,
+          message: messages[messages.length-1].content
+        })
       });
 
-    //Get first response
-    const response = await chat.sendMessage(
-    {
-      message:messages[messages.length-1].content
-    });
+      if (!result.ok)
+      {
+        throw new Error(`Gemini request failed with status ${result.status}`);
+      }
 
-    return response.text;
+      const data = await result.json();
+      return data.text;
   }
   function find_score(new_response)
   {
@@ -160,7 +152,7 @@ function Interview(props)
   }
   async function handle_response(new_ai_response)
   {
-    //setChatGPTResponse(new_ai_response);
+    console.log(new_ai_response);
 
     //Find the score in the generative AI response
     const score=find_score(new_ai_response);
@@ -188,7 +180,7 @@ function Interview(props)
       //Framing so the interviewer AI responds to the question and does NOT GIVE ANOTHER QUESTION
       const system_response_message= {role:ai_role_name,content:system_response_content};
 
-      //???
+      //context_message
       const interview_message={role:'user',content:ai_context_query};
 
       let user_answer_message={};

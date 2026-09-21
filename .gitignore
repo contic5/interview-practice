@@ -28,3 +28,5 @@ dist-ssr
 
 #Ignore build files
 build/
+.vercel
+.env*
