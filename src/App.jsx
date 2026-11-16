@@ -23,16 +23,23 @@ function App()
     setQuestionType(new_question_type);
     console.log(new_question_type);
   }
+  function handleMainAI(e)
+  {
+    const new_ai=e.target.value;
+    setMainAI(new_ai);
+    console.log(new_ai);
+  }
   const [mode,setMode]=useState("setup");
   const [question_type,setQuestionType]=useState("customer_service_scenario");
   const [ai_context_query,setAIContextQuery]=useState("Give me a practice interivew for a Entry level Front End position. The company is a Small company and this is the Phone Screening interview. Ask me one question at a time.");
+  const [main_ai,setMainAI]=useState("chatgpt");
 
   if(mode=="setup")
   {
     return (
       <>
         <h1>Interview Practice</h1>
-        <SetupInterview toInterview={toInterview} switch_mode={switch_mode} handleQuestionType={handleQuestionType} question_type={question_type}></SetupInterview>
+        <SetupInterview toInterview={toInterview} switch_mode={switch_mode} handleQuestionType={handleQuestionType} question_type={question_type} main_ai={main_ai} handleMainAI={handleMainAI}></SetupInterview>
       </>
     );
   }
@@ -41,7 +48,7 @@ function App()
     return (
       <>
         <h1>Interview Practice</h1>
-        <Interview ai_context_query={ai_context_query} question_type={question_type} switch_mode={switch_mode}></Interview>
+        <Interview ai_context_query={ai_context_query} question_type={question_type} switch_mode={switch_mode} main_ai={main_ai}></Interview>
       </>
     );
   }

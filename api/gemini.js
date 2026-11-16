@@ -28,6 +28,10 @@ export default async function handler(req, res)
         schema: zod_format
       },
     });
+    
+    console.log(interaction);
+    console.log(interaction.output_text);
+
     res.status(200).json({output_parsed: zod_format.parse(JSON.parse(interaction.output_text))});
   }
   catch (error)

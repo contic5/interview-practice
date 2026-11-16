@@ -8,6 +8,8 @@ function SetupInterview(props)
 {
     const toInterview=props.toInterview;
     const question_type=props.question_type;
+    const handleMainAI=props.handleMainAI;
+    const main_ai=props.main_ai;
 
     function handleRole(e)
     {
@@ -141,6 +143,12 @@ function SetupInterview(props)
     <option value="Behavioral Interview">Behavioral Interview</option>
     <option value="Technical Questions">Technical Questions</option>
     <option value="Final Round">Final Round</option>
+    </select>
+
+    <label htmlFor="ai">AI:</label>
+    <select id="ai" value={main_ai} onChange={handleMainAI} className="block">
+    <option value="chatgpt">ChatGPT</option>
+    <option value="gemini">Gemini</option>
     </select>
 
     <button onClick={submitQuery}>Submit</button>

@@ -9,14 +9,6 @@ import { z } from "zod";
 //If false, the Interview System does not run queries.
 const running_queries=true;
 
-//Main AI can be gemini or chatgpt
-const main_ai="chatgpt";
-let ai_role_name="system";
-if(main_ai=="gemini")
-{
-  ai_role_name="model";
-}
-
 const FeedbackStructure = z.object({
   score: z.number().describe("A rating integer strictly between 1 and 10 inclusive."),
   feedback: z.string().describe("Feedback on the person's answer"),
@@ -47,6 +39,14 @@ const zode_feedback_schema=z.fromJSONSchema(feedback_schema);
 
 function Interview(props)
 {
+  //Main AI can be gemini or chatgpt
+  const main_ai=props.main_ai;
+  let ai_role_name="system";
+  if(main_ai=="gemini")
+  {
+    ai_role_name="model";
+  }
+
   const question_type=props.question_type;
 
   //Respond to interview question
@@ -256,6 +256,7 @@ function Interview(props)
   return(
   <>
   <h2>Interview</h2>
+  <h3>{main_ai.toUpperCase()}</h3>
   <button onClick={()=>props.switch_mode("setup")}>Change Interview Settings</button>
   <h3>Interview Settings</h3>
   <div>
