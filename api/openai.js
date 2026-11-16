@@ -1,16 +1,9 @@
 /// <reference types="node" />
 
 import OpenAI from "openai";
-import { zodTextFormat } from "openai/helpers/zod";
-import { z } from "zod";
 
 const client = new OpenAI({
   apiKey: globalThis.process.env.OPEN_AI,
-});
-
-const OutputStructure = z.object({
-  score: z.number().describe("A rating integer strictly between 1 and 10 inclusive."),
-  feedback: z.string().describe("Feedback on the person's answer"),
 });
 
 export default async function handler(req, res) 
@@ -24,8 +17,15 @@ export default async function handler(req, res)
 
     try 
     {
+        console.log(req.body);
         const messages = req.body.messages;
-        
+        const zod_format=req.body.zod_format;
+        console.log("Messages: "+messages);
+        console.log("Zod format: "+zod_format);
+
+        /*return res.status(400).json({
+            error:"Just testing"
+        });*/
 
         if (!messages) 
         {
@@ -38,7 +38,7 @@ export default async function handler(req, res)
         model: "gpt-6.1-terra",
         input: messages,
         text: {
-            format: zodTextFormat(OutputStructure, "feedback"),
+            format: zod_format,
         },
         });
 

@@ -3,6 +3,9 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
+import { zodTextFormat } from "openai/helpers/zod";
+import { z } from "zod";
+
 //If false, the Interview System does not run queries.
 const running_queries=true;
 
@@ -13,6 +16,17 @@ if(main_ai=="gemini")
 {
   ai_role_name="model";
 }
+
+const FeedbackStructure = z.object({
+  score: z.number().describe("A rating integer strictly between 1 and 10 inclusive."),
+  feedback: z.string().describe("Feedback on the person's answer"),
+});
+const zod_feedback_structure=zodTextFormat(FeedbackStructure, "feedback");
+
+const NextQuestionStructure = z.object({
+  question: z.string().describe("The next question for the interviewee to answer"),
+});
+const zod_next_question_structure=zodTextFormat(NextQuestionStructure, "feedback");
 
 function Interview(props)
 {
@@ -32,8 +46,8 @@ function Interview(props)
   const ai_context_query=props.ai_context_query;
 
   const [user_answer,setUserAnswer]=useState("");
-  const [ai_response,setChatGPTResponse]=useState("");
-  const [ai_question,setChatGPTQuestion]=useState("");
+  const [ai_response,setAIResponse]=useState("");
+  const [ai_question,setAIQuestion]=useState("");
 
   const [timer_speed,setTimerSpeed]=useState(10);
   useEffect(()=>
@@ -51,10 +65,16 @@ function Interview(props)
   },[question_type]);
 
   const [scores,setScores]=useState([]);
+  const [score_elements,setScoreElements]=useState();
 
-  const score_elements=scores.map((score,index)=><p key={index}>{score}/10</p>);
+  useEffect(()=>{
+      console.log(`Scores: `+scores);
+      let score_elements_temp=scores.map((score,index)=><p key={index}>{score}/10</p>);
+      console.log(`Total Score Elements: ${score_elements_temp.length}`);
+      setScoreElements(score_elements_temp);
+  },[scores])
   
-  async function get_ai_response(messages)
+  async function get_chatgpt_response(messages,zod_format)
   {
     console.log("Messages");
     console.log(messages);
@@ -71,7 +91,8 @@ function Interview(props)
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        messages: messages
+        messages: messages,
+        zod_format: zod_format,
       })
     });
 
@@ -115,7 +136,7 @@ function Interview(props)
     const score=new_ai_response.score;
     let scores_temp=[...scores];
     scores_temp.push(score);
-    setScores(scores);
+    setScores(scores_temp);
 
     //Message telling the AI that it does interviews.
     const system_generation_message= {role:ai_role_name,content:system_question_generation_content};
@@ -127,18 +148,18 @@ function Interview(props)
 
     let new_question="Currently not displaying new questions";
 
-    if(false)
+    if(main_ai=="chatgpt")
     {
-      if(main_ai=="chatgpt")
-      {
-        new_question=await get_ai_response(messages);
-      }
-      else
-      {
-        new_question=await get_gemini_response(messages);
-      }
+      const next_question_response=await get_chatgpt_response(messages,zod_next_question_structure);
+      console.log(next_question_response);
+      new_question=next_question_response.question
     }
-    setChatGPTQuestion(new_question);
+    else
+    {
+      const next_question_response=await get_gemini_response(messages);
+      new_question=next_question_response.question;
+    }
+    setAIQuestion(new_question);
     
     setTimeout(()=>gradual_display_info(new_ai_response.feedback,new_question,0,0))
     if(!running_queries)
@@ -151,13 +172,13 @@ function Interview(props)
     if(new_ai_response_index<new_ai_response_text.length)
     {
       new_ai_response_index+=1;
-      setChatGPTResponse(new_ai_response_text.substring(0,new_ai_response_index));
+      setAIResponse(new_ai_response_text.substring(0,new_ai_response_index));
       setTimeout(()=>gradual_display_info(new_ai_response_text,new_question,new_ai_response_index,new_question_index),timer_speed);
     }
     else if(new_question_index<new_question.length)
     {
       new_question_index+=1;
-      setChatGPTQuestion(new_question.substring(0,new_question_index));
+      setAIQuestion(new_question.substring(0,new_question_index));
       setTimeout(()=>gradual_display_info(new_ai_response_text,new_question,new_ai_response_index,new_question_index),timer_speed);
     }
     else
@@ -193,7 +214,7 @@ function Interview(props)
       let new_ai_response={};
       if(main_ai=="chatgpt")
       {
-        new_ai_response=await get_ai_response(messages);
+        new_ai_response=await get_chatgpt_response(messages,zod_feedback_structure);
       }
       else
       {
