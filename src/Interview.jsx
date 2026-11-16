@@ -7,7 +7,7 @@ import './App.css'
 const running_queries=true;
 
 //Main AI can be gemini or chatgpt
-const main_ai="gemini";
+const main_ai="chatgpt";
 let ai_role_name="system";
 if(main_ai=="gemini")
 {
@@ -56,6 +56,7 @@ function Interview(props)
   
   async function get_ai_response(messages)
   {
+    console.log("Messages");
     console.log(messages);
     //Return blank message if we are not running queries
     if(!running_queries)
@@ -64,22 +65,20 @@ function Interview(props)
     }
 
     //Get query from ChatGPT
-    const result = await fetch('/api/openai', {
+    const response = await fetch('/api/openai', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "gpt-5-nano",
         messages: messages
       })
     });
 
     //Choose the first response.
-    const data = await result.json();
-    const chatGPTMesage = data.choices[0].message;
-    //setMessages([...updatedMessages, assistantReply]);
-    return chatGPTMesage.content;
+    const data = await response.json();
+    console.log(data);
+    return data.output_parsed;
   }
   async function get_gemini_response(messages)
   {
@@ -108,55 +107,15 @@ function Interview(props)
       const data = await result.json();
       return data.text;
   }
-  function find_score(new_response)
-  {
-    //If we are not running queries, return -1
-    if(!running_queries)
-    {
-      return -1;
-    }
-
-    let words=new_response.split(" ");
-    words=words.reverse();
-    //Find the last word that contains a /. That would be the word with X/10.
-    for(let word of words)
-    {
-      if(word.includes("/"))
-      {
-        const parts=word.split("/");
-        //By taking the first part of X/10, we get the score.
-        console.log(`Score: ${parts}`);
-        return parseInt(parts[0]);
-      }
-    }
-    return -1;
-  }
-  function gradual_display_info(new_ai_response,new_question,new_ai_response_index,new_question_index)
-  {
-    if(new_ai_response_index<new_ai_response.length)
-    {
-      new_ai_response_index+=1;
-      setChatGPTResponse(new_ai_response.substring(0,new_ai_response_index));
-      setTimeout(()=>gradual_display_info(new_ai_response,new_question,new_ai_response_index,new_question_index),timer_speed);
-    }
-    else if(new_question_index<new_question.length)
-    {
-      new_question_index+=1;
-      setChatGPTQuestion(new_question.substring(0,new_question_index));
-      setTimeout(()=>gradual_display_info(new_ai_response,new_question,new_ai_response_index,new_question_index),timer_speed);
-    }
-    else
-    {
-
-    }
-  }
   async function handle_response(new_ai_response)
   {
     console.log(new_ai_response);
 
     //Find the score in the generative AI response
-    const score=find_score(new_ai_response);
-    setScores(scores=>[...scores,score]);
+    const score=new_ai_response.score;
+    let scores_temp=[...scores];
+    scores_temp.push(score);
+    setScores(scores);
 
     //Message telling the AI that it does interviews.
     const system_generation_message= {role:ai_role_name,content:system_question_generation_content};
@@ -164,13 +123,46 @@ function Interview(props)
     //User message asking for new interview question.
     const new_question_message={role:'user',content:`${ai_context_query}`};
     const messages=[system_generation_message,new_question_message];
-    const new_question=await get_gemini_response(messages);
-    //setChatGPTQuestion(new_question);
 
-    setTimeout(()=>gradual_display_info(new_ai_response,new_question,0,0))
+
+    let new_question="Currently not displaying new questions";
+
+    if(false)
+    {
+      if(main_ai=="chatgpt")
+      {
+        new_question=await get_ai_response(messages);
+      }
+      else
+      {
+        new_question=await get_gemini_response(messages);
+      }
+    }
+    setChatGPTQuestion(new_question);
+    
+    setTimeout(()=>gradual_display_info(new_ai_response.feedback,new_question,0,0))
     if(!running_queries)
     {
       console.log("Queries are not running right now. This saves money and is good for testing. If you want to see queries, turn queries back on.");
+    }
+  }
+  function gradual_display_info(new_ai_response_text,new_question,new_ai_response_index,new_question_index)
+  {
+    if(new_ai_response_index<new_ai_response_text.length)
+    {
+      new_ai_response_index+=1;
+      setChatGPTResponse(new_ai_response_text.substring(0,new_ai_response_index));
+      setTimeout(()=>gradual_display_info(new_ai_response_text,new_question,new_ai_response_index,new_question_index),timer_speed);
+    }
+    else if(new_question_index<new_question.length)
+    {
+      new_question_index+=1;
+      setChatGPTQuestion(new_question.substring(0,new_question_index));
+      setTimeout(()=>gradual_display_info(new_ai_response_text,new_question,new_ai_response_index,new_question_index),timer_speed);
+    }
+    else
+    {
+
     }
   }
   async function submitInput()
@@ -185,12 +177,12 @@ function Interview(props)
       //If we are asking interview questions, then give an interview question
       if(question_type=="interview_question")
       {
-        user_answer_message = { role: 'user', content: `You asked me ${ai_question} My answer was ${user_answer}. Write the score on the last line as X/10. Do not ask another question. Only give me your feedback.` };
+        user_answer_message = { role: 'user', content: `You asked me ${ai_question} My answer was ${user_answer}.  Do not ask another question.` };
       }
       //Otherwise, give a scenario.
       else
       {
-        user_answer_message = { role: 'user', content: `You asked me ${ai_question} My answer was ${user_answer}. Write the score on the last line as X/10. Do not give me another scenario. Only give me your feedback.` };
+        user_answer_message = { role: 'user', content: `You asked me ${ai_question} My answer was ${user_answer}. Do not give me another scenario.` };
       }
 
       //Store the question the interviewer asked, 
@@ -198,7 +190,7 @@ function Interview(props)
       console.log(messages);
 
       //Get response from ChatGPT or Google Gemini
-      let new_ai_response="";
+      let new_ai_response={};
       if(main_ai=="chatgpt")
       {
         new_ai_response=await get_ai_response(messages);
@@ -207,8 +199,10 @@ function Interview(props)
       {
         new_ai_response=await get_gemini_response(messages);
       }
+
+      alert("AI Response complete");
+      console.log(new_ai_response);
       handle_response(new_ai_response);
-    
   }
   function handleInput(e)
   {
