@@ -2,6 +2,10 @@
 
 import { GoogleGenAI } from '@google/genai';
 
+const client = new GoogleGenAI({
+    apiKey: globalThis.process.env.GOOGLE_GEMINI_KEY,
+});
+
 export default async function handler(req, res)
 {
   if (req.method !== 'POST')
@@ -9,22 +13,22 @@ export default async function handler(req, res)
     return res.status(405).json({error: 'Method not allowed'});
   }
 
-  const {history, message} = req.body ?? {};
-  if (!Array.isArray(history) || typeof message !== 'string' || message.length === 0)
-  {
-    return res.status(400).json({error: 'A history array and message are required'});
-  }
+  const messages = req.body.messages;
+  const zod_format=req.body.zod_format;
 
   try
   {
-    const googleAI = new GoogleGenAI({apiKey: globalThis.process.env.GOOGLE_GEMINI});
-    const chat = googleAI.chats.create({
-      model: 'gemini-3.6-flash',
-      history: history
+   const interaction = await client.interactions.create(
+    {
+      model: "gemini-4-hydrogen",
+      input: messages,
+      response_format: {
+        type: 'text',
+        mime_type: 'application/json',
+        schema: zod_format
+      },
     });
-    const result = await chat.sendMessage({message: message});
-
-    res.status(200).json({text: result.text});
+    res.status(200).json({output_parsed: zod_format.parse(JSON.parse(interaction.output_text))});
   }
   catch (error)
   {

@@ -28,6 +28,23 @@ const NextQuestionStructure = z.object({
 });
 const zod_next_question_structure=zodTextFormat(NextQuestionStructure, "feedback");
 
+const feedback_schema = {
+  type: "object",
+  properties: {
+    score: {
+      type: "integer",
+      description: "A rating integer strictly between 1 and 10 inclusive."
+    },
+    feedback: {
+        type: "integer",
+        description: "Feedback on the person's answer"
+    },
+  },
+  required: ["score", "feedback"]
+}; 
+
+const zode_feedback_schema=z.fromJSONSchema(feedback_schema);
+
 function Interview(props)
 {
   const question_type=props.question_type;
@@ -156,7 +173,7 @@ function Interview(props)
     }
     else
     {
-      const next_question_response=await get_gemini_response(messages);
+      const next_question_response=await get_gemini_response(messages,zod_next_question_structure);
       new_question=next_question_response.question;
     }
     setAIQuestion(new_question);
@@ -218,7 +235,7 @@ function Interview(props)
       }
       else
       {
-        new_ai_response=await get_gemini_response(messages);
+        new_ai_response=await get_gemini_response(messages,zod_feedback_structure);
       }
 
       alert("AI Response complete");
