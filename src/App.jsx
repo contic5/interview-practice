@@ -32,7 +32,7 @@ function App()
   const [mode,setMode]=useState("setup");
   const [question_type,setQuestionType]=useState("customer_service_scenario");
   const [ai_context_query,setAIContextQuery]=useState("Give me a practice interivew for a Entry level Front End position. The company is a Small company and this is the Phone Screening interview. Ask me one question at a time.");
-  const [main_ai,setMainAI]=useState("chatgpt");
+  const [main_ai,setMainAI]=useState("Gemini");
 
   if(mode=="setup")
   {

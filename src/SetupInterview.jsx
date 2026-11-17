@@ -147,8 +147,8 @@ function SetupInterview(props)
 
     <label htmlFor="ai">AI:</label>
     <select id="ai" value={main_ai} onChange={handleMainAI} className="block">
-    <option value="chatgpt">ChatGPT</option>
-    <option value="gemini">Gemini</option>
+    <option value="ChatGPT">ChatGPT</option>
+    <option value="Gemini">Gemini</option>
     </select>
 
     <button onClick={submitQuery}>Submit</button>

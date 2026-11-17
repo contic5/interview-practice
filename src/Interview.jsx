@@ -20,23 +20,6 @@ const NextQuestionStructure = z.object({
 });
 const zod_next_question_structure=zodTextFormat(NextQuestionStructure, "feedback");
 
-const feedback_schema = {
-  type: "object",
-  properties: {
-    score: {
-      type: "integer",
-      description: "A rating integer strictly between 1 and 10 inclusive."
-    },
-    feedback: {
-        type: "integer",
-        description: "Feedback on the person's answer"
-    },
-  },
-  required: ["score", "feedback"]
-}; 
-
-const zode_feedback_schema=z.fromJSONSchema(feedback_schema);
-
 function Interview(props)
 {
   //Main AI can be gemini or chatgpt
@@ -78,7 +61,7 @@ function Interview(props)
     {
       new_question="How would you first talk with a new customer or client?";
     }
-    gradual_display_info("After you give your answer, ChatGPT will respond.",new_question,0,0);
+    gradual_display_info(`After you give your answer, ${main_ai} will respond.`,new_question,0,0);
   },[question_type]);
 
   const [scores,setScores]=useState([]);
@@ -118,22 +101,27 @@ function Interview(props)
     console.log(data);
     return data.output_parsed;
   }
-  async function get_gemini_response(messages)
+  async function get_gemini_response(messages,zod_format)
   {
       //Convert ChatGPT message history format to gemini message history format.
       let history=[];
-      for (let i=0;i<messages.length-1;i++)
+      for (let i=1;i<messages.length;i++)
       {
-        history.push({role:messages[i].role,parts:[{text:messages[i].content}]});
+        history.push({
+          type:messages[i].role+"_input",
+          content:[{type:"text",text:messages[i].content}]
+        });
       }
+
       const result = await fetch('/api/gemini', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          system_instruction: messages[0].content,
           history: history,
-          message: messages[messages.length-1].content
+          zod_format: zod_format
         })
       });
 
@@ -143,7 +131,8 @@ function Interview(props)
       }
 
       const data = await result.json();
-      return data.text;
+      console.log(data);
+      return data.output_parsed;
   }
   async function handle_response(new_ai_response)
   {
@@ -165,7 +154,7 @@ function Interview(props)
 
     let new_question="Currently not displaying new questions";
 
-    if(main_ai=="chatgpt")
+    if(main_ai=="ChatGPT")
     {
       const next_question_response=await get_chatgpt_response(messages,zod_next_question_structure);
       console.log(next_question_response);
@@ -229,7 +218,7 @@ function Interview(props)
 
       //Get response from ChatGPT or Google Gemini
       let new_ai_response={};
-      if(main_ai=="chatgpt")
+      if(main_ai=="ChatGPT")
       {
         new_ai_response=await get_chatgpt_response(messages,zod_feedback_structure);
       }
@@ -256,16 +245,16 @@ function Interview(props)
   return(
   <>
   <h2>Interview</h2>
-  <h3>{main_ai.toUpperCase()}</h3>
+  <h3>{main_ai}</h3>
   <button onClick={()=>props.switch_mode("setup")}>Change Interview Settings</button>
   <h3>Interview Settings</h3>
   <div>
   <label htmlFor="timer_speed">Timer Speed:{timer_speed}</label>
   <input id="timer_speed" value={timer_speed} onChange={handleTimeSpeed} type="range" min={1} max={100}></input>
   </div>
-  <h3>ChatGPT Response</h3>
+  <h3>{main_ai} Response</h3>
   <p>{ai_response}</p>
-  <h3>ChatGPT Question</h3>
+  <h3>{main_ai} Question</h3>
   <p>{ai_question}</p>
   <h3>Your Answer</h3>
   <textarea id="user_answer" onChange={handleInput} value={user_answer} rows="8" cols="50">
